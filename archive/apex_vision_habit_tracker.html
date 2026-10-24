@@ -1,0 +1,1794 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Apex Vision" />
+  <title>Apex — Vision Board & Habit System</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+          },
+          colors: {
+            slate: {
+              850: '#131c2e',
+              925: '#0b1120',
+              950: '#060a14',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    * {
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      overscroll-behavior-y: none;
+    }
+    /* Prevent iOS zoom on form inputs */
+    input, select, textarea {
+      font-size: 16px !important;
+    }
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.25);
+      border-radius: 9999px;
+    }
+    .glass-card {
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+    .safe-pb {
+      padding-bottom: calc(5.5rem + var(--safe-bottom));
+    }
+    .safe-nav-pb {
+      padding-bottom: max(0.65rem, var(--safe-bottom));
+    }
+    .safe-pt {
+      padding-top: max(1rem, var(--safe-top));
+    }
+    @keyframes pop {
+      0% { transform: scale(0.92); }
+      50% { transform: scale(1.06); }
+      100% { transform: scale(1); }
+    }
+    .animate-pop {
+      animation: pop 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    /* Hide scrollbar for horizontal pill filters */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen transition-colors duration-200 selection:bg-indigo-500 selection:text-white">
+
+  <!-- Ambient Background Glows -->
+  <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+    <div class="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-indigo-500/10 dark:bg-indigo-500/15 blur-3xl"></div>
+    <div class="absolute top-1/3 -left-40 w-96 h-96 rounded-full bg-emerald-500/10 dark:bg-emerald-500/10 blur-3xl"></div>
+    <div class="absolute bottom-10 right-1/4 w-80 h-80 rounded-full bg-amber-500/5 dark:bg-amber-500/10 blur-3xl"></div>
+  </div>
+
+  <!-- App Layout Container -->
+  <div class="relative z-10 flex min-h-screen">
+
+    <!-- Desktop Sidebar Navigation -->
+    <aside class="hidden md:flex flex-col w-64 lg:w-72 shrink-0 border-r border-slate-200/80 dark:border-slate-800/80 bg-white/75 dark:bg-slate-925/80 glass-card sticky top-0 h-screen p-5 justify-between">
+      <div>
+        <!-- Brand Header -->
+        <div class="flex items-center justify-between mb-8 px-2">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-500 via-violet-500 to-emerald-400 flex items-center justify-center shadow-lg shadow-indigo-500/25">
+              <i data-lucide="compass" class="w-5 h-5 text-white"></i>
+            </div>
+            <div>
+              <h1 class="font-bold text-lg tracking-tight leading-none">APEX</h1>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium">Vision & Habit OS</p>
+            </div>
+          </div>
+          <button onclick="toggleTheme()" title="Toggle Light/Dark Mode" class="p-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+            <i data-lucide="sun" class="w-4 h-4 hidden dark:block text-amber-400"></i>
+            <i data-lucide="moon" class="w-4 h-4 block dark:hidden text-slate-700"></i>
+          </button>
+        </div>
+
+        <!-- Nav Links -->
+        <nav class="space-y-1.5" id="desktop-nav">
+          <button onclick="switchTab('dashboard')" data-tab="dashboard" class="nav-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-sm font-semibold transition-all">
+            <i data-lucide="layout-grid" class="w-4 h-4"></i>
+            <span>Dashboard</span>
+          </button>
+          <button onclick="switchTab('vision')" data-tab="vision" class="nav-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-sm font-semibold transition-all">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+            <span>Vision Board</span>
+            <span id="sidebar-vision-count" class="ml-auto text-xs px-2 py-0.5 rounded-full bg-slate-200/70 dark:bg-slate-800 text-slate-600 dark:text-slate-300">0</span>
+          </button>
+          <button onclick="switchTab('habits')" data-tab="habits" class="nav-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-sm font-semibold transition-all">
+            <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+            <span>Habit Tracker</span>
+            <span id="sidebar-habit-progress" class="ml-auto text-xs px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-semibold">0/0</span>
+          </button>
+          <button onclick="switchTab('analytics')" data-tab="analytics" class="nav-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-sm font-semibold transition-all">
+            <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+            <span>Analytics & Data</span>
+          </button>
+        </nav>
+
+        <!-- Pillar Legend -->
+        <div class="mt-8 pt-6 border-t border-slate-200/70 dark:border-slate-800/80 px-2">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-3">Life Pillars</p>
+          <div class="space-y-2.5 text-xs font-medium text-slate-600 dark:text-slate-400">
+            <div class="flex items-center gap-2.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
+              <span>Technical & AI</span>
+            </div>
+            <div class="flex items-center gap-2.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-violet-400"></span>
+              <span>Career & Leadership</span>
+            </div>
+            <div class="flex items-center gap-2.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+              <span>Family & Wealth</span>
+            </div>
+            <div class="flex items-center gap-2.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+              <span>Health & Vitality</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Action Footer -->
+      <div class="space-y-2.5">
+        <div class="p-3.5 rounded-2xl bg-slate-100/90 dark:bg-slate-900/90 border border-slate-200/70 dark:border-slate-800/80">
+          <div class="flex items-center justify-between text-xs mb-1">
+            <span class="text-slate-500 dark:text-slate-400 font-medium">Today's Momentum</span>
+            <span id="sidebar-momentum-pct" class="font-bold text-indigo-600 dark:text-indigo-400">0%</span>
+          </div>
+          <div class="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+            <div id="sidebar-momentum-bar" class="h-full bg-gradient-to-r from-indigo-500 to-emerald-400 rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="openVisionModal()" class="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm transition-all">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Vision
+          </button>
+          <button onclick="openHabitModal()" class="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-slate-800 dark:bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold shadow-sm transition-all">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Habit
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Column -->
+    <div class="flex-1 flex flex-col min-w-0 safe-pb md:pb-12">
+
+      <!-- Mobile Sticky Top Header -->
+      <header class="md:hidden sticky top-0 z-30 bg-white/80 dark:bg-slate-950/80 glass-card border-b border-slate-200/80 dark:border-slate-800/80 px-4 pb-3 safe-pt">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 via-violet-500 to-emerald-400 flex items-center justify-center shadow-md shadow-indigo-500/20">
+              <i data-lucide="compass" class="w-4 h-4 text-white"></i>
+            </div>
+            <div>
+              <h1 class="font-bold text-base tracking-tight leading-none">APEX OS</h1>
+              <p id="mobile-date-sub" class="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5"></p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="openVisionModal()" class="p-2 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 text-xs font-semibold flex items-center gap-1">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span>Vision</span>
+            </button>
+            <button onclick="openHabitModal()" class="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-semibold flex items-center gap-1">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span>Habit</span>
+            </button>
+            <button onclick="toggleTheme()" class="p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100/70 dark:bg-slate-900/70">
+              <i data-lucide="sun" class="w-4 h-4 hidden dark:block text-amber-400"></i>
+              <i data-lucide="moon" class="w-4 h-4 block dark:hidden text-slate-700"></i>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Workspace Container -->
+      <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-5 md:pt-8 space-y-6">
+
+        <!--Global Pillar Filter Bar (Shared across Dashboard, Vision, Habits) -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 id="view-title" class="text-2xl sm:text-3xl font-extrabold tracking-tight">Command Center</h2>
+            <p id="view-subtitle" class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">Align daily execution with long-term life architecture.</p>
+          </div>
+
+          <!-- Pillar Filter Pills -->
+          <div id="pillar-filter-container" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 sm:pb-0">
+            <button onclick="setPillarFilter('all')" data-pillar="all" class="pillar-pill shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all">
+              All Pillars
+            </button>
+            <button onclick="setPillarFilter('tech')" data-pillar="tech" class="pillar-pill shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-cyan-400"></span> Technical & AI
+            </button>
+            <button onclick="setPillarFilter('career')" data-pillar="career" class="pillar-pill shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-violet-400"></span> Career & Leadership
+            </button>
+            <button onclick="setPillarFilter('family')" data-pillar="family" class="pillar-pill shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span> Family & Wealth
+            </button>
+            <button onclick="setPillarFilter('health')" data-pillar="health" class="pillar-pill shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Health & Vitality
+            </button>
+          </div>
+        </div>
+
+        <!-- ==================== TAB 1: DASHBOARD (BENTO OVERVIEW) ==================== -->
+        <section id="tab-dashboard" class="space-y-6">
+          <!-- Top Bento KPI Row -->
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+            <!-- KPI 1: Today's Habits -->
+            <div class="p-4 sm:p-5 rounded-3xl bg-white/80 dark:bg-slate-900/75 border border-slate-200/80 dark:border-slate-800/80 glass-card shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Today's Habits</span>
+                <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+                  <i data-lucide="check-check" class="w-4 h-4"></i>
+                </div>
+              </div>
+              <div class="mt-3">
+                <div class="flex items-baseline gap-2">
+                  <span id="kpi-today-done" class="text-2xl sm:text-3xl font-extrabold">0/0</span>
+                  <span id="kpi-today-pct" class="text-xs font-semibold text-emerald-500">0%</span>
+                </div>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Daily check-in completion</p>
+              </div>
+            </div>
+
+            <!-- KPI 2: Active Streak -->
+            <div class="p-4 sm:p-5 rounded-3xl bg-white/80 dark:bg-slate-900/75 border border-slate-200/80 dark:border-slate-800/80 glass-card shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Top Streak</span>
+                <div class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
+                  <i data-lucide="flame" class="w-4 h-4"></i>
+                </div>
+              </div>
+              <div class="mt-3">
+                <div class="flex items-baseline gap-2">
+                  <span id="kpi-top-streak" class="text-2xl sm:text-3xl font-extrabold">0d</span>
+                  <span id="kpi-best-streak" class="text-xs font-medium text-slate-400">Best: 0d</span>
+                </div>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Consecutive habit momentum</p>
+              </div>
+            </div>
+
+            <!-- KPI 3: Vision Progress -->
+            <div class="p-4 sm:p-5 rounded-3xl bg-white/80 dark:bg-slate-900/75 border border-slate-200/80 dark:border-slate-800/80 glass-card shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Vision Mastery</span>
+                <div class="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center">
+                  <i data-lucide="target" class="w-4 h-4"></i>
+                </div>
+              </div>
+              <div class="mt-3">
+                <div class="flex items-baseline gap-2">
+                  <span id="kpi-vision-avg" class="text-2xl sm:text-3xl font-extrabold">0%</span>
+                  <span id="kpi-vision-milestones" class="text-xs font-medium text-indigo-400">0/0 milestones</span>
+                </div>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Across active life pillars</p>
+              </div>
+            </div>
+
+            <!-- KPI 4: Weekly Target Rate -->
+            <div class="p-4 sm:p-5 rounded-3xl bg-white/80 dark:bg-slate-900/75 border border-slate-200/80 dark:border-slate-800/80 glass-card shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">7-Day Score</span>
+                <div class="w-8 h-8 rounded-xl bg-cyan-500/10 text-cyan-500 flex items-center justify-center">
+                  <i data-lucide="activity" class="w-4 h-4"></i>
+                </div>
+              </div>
+              <div class="mt-3">
+                <div class="flex items-baseline gap-2">
+                  <span id="kpi-weekly-rate" class="text-2xl sm:text-3xl font-extrabold">0%</span>
+                  <span class="text-xs font-medium text-cyan-500">Rolling 7d</span>
+                </div>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Weekly target alignment</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bento Main Split: Quick Today Habits + Spotlight Visions -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Left 5 Cols: Today's Action Check-In -->
+            <div class="lg:col-span-5 p-5 sm:p-6 rounded-3xl bg-white/85 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800/80 glass-card flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 class="font-bold text-base sm:text-lg flex items-center gap-2">
+                      <i data-lucide="zap" class="w-4 h-4 text-amber-400"></i>
+                      Today's Ritual Check-In
+                    </h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">1-tap log for today's non-negotiables</p>
+                  </div>
+                  <button onclick="switchTab('habits')" class="text-xs font-semibold text-indigo-500 hover:text-indigo-400 flex items-center gap-1">
+                    <span>Full Grid</span>
+                    <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
+                <div id="dashboard-habit-list" class="space-y-2.5"></div>
+              </div>
+
+              <!-- Mini 90-Day Consistency Teaser -->
+              <div class="mt-6 pt-5 border-t border-slate-200/70 dark:border-slate-800/80">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">Last 28 Days Consistency</span>
+                  <button onclick="switchTab('habits')" class="text-[11px] text-slate-400 hover:text-indigo-400">90-Day Heatmap →</button>
+                </div>
+                <div id="dashboard-mini-heatmap" class="grid grid-cols-14 gap-1.5"></div>
+              </div>
+            </div>
+
+            <!-- Right 7 Cols: Vision Board Bento Highlights -->
+            <div class="lg:col-span-7 p-5 sm:p-6 rounded-3xl bg-white/85 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800/80 glass-card">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h3 class="font-bold text-base sm:text-lg flex items-center gap-2">
+                    <i data-lucide="sparkles" class="w-4 h-4 text-indigo-400"></i>
+                    Active Vision Architecture
+                  </h3>
+                  <p class="text-xs text-slate-500 dark:text-slate-400">Core trajectories & interactive milestones</p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button onclick="openVisionModal()" class="text-xs font-semibold px-3 py-1.5 rounded-xl bg-indigo-500/10 text-indigo-500 hover:bg-indigo-500/20 transition-all">
+                    + New Vision
+                  </button>
+                  <button onclick="switchTab('vision')" class="text-xs font-semibold text-indigo-500 hover:text-indigo-400 flex items-center gap-1">
+                    <span>All</span>
+                    <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div id="dashboard-vision-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== TAB 2: VISION BOARD (BENTO / MASONRY) ==================== -->
+        <section id="tab-vision" class="hidden space-y-6">
+          <div class="flex flex-wrap items-center justify-between gap-3 p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/15">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-indigo-500/15 text-indigo-400 flex items-center justify-center shrink-0">
+                <i data-lucide="Compass" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <p class="text-xs sm:text-sm font-semibold">Interactive Milestone Tracking</p>
+                <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">Tap any milestone directly on a Vision Card to update completion progress automatically.</p>
+              </div>
+            </div>
+            <button onclick="openVisionModal()" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-500/20 flex items-center gap-1.5 transition-all">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>Add Vision Card</span>
+            </button>
+          </div>
+
+          <!-- Full Vision Grid -->
+          <div id="full-vision-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-5"></div>
+        </section>
+
+        <!-- ==================== TAB 3: HABIT TRACKER & HEATMAP ==================== -->
+        <section id="tab-habits" class="hidden space-y-6">
+          <!-- Habit Header Controls -->
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+              <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 font-medium">
+                <i data-lucide="calendar-days" class="w-3.5 h-3.5 text-emerald-400"></i>
+                Tap any day in the 7-day rolling window to log or catch up
+              </span>
+            </div>
+            <button onclick="openHabitModal()" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-md shadow-emerald-500/20 flex items-center gap-1.5 transition-all">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>New Habit Ritual</span>
+            </button>
+          </div>
+
+          <!-- 7-Day Rolling Habit Matrix -->
+          <div id="full-habit-list" class="space-y-3.5"></div>
+
+          <!-- GitHub-Style 90-Day Consistency Heatmap Card -->
+          <div class="p-5 sm:p-6 rounded-3xl bg-white/85 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800/80 glass-card">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+              <div>
+                <h3 class="font-bold text-base flex items-center gap-2">
+                  <i data-lucide="grid" class="w-4 h-4 text-emerald-400"></i>
+                  90-Day Consistency Heatmap
+                </h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Daily ritual intensity over the past 13 weeks</p>
+              </div>
+              <!-- Heatmap Legend -->
+              <div class="flex items-center gap-1.5 text-[11px] text-slate-400">
+                <span>Less</span>
+                <span class="w-3 h-3 rounded-sm bg-slate-200 dark:bg-slate-800"></span>
+                <span class="w-3 h-3 rounded-sm bg-emerald-900/60 dark:bg-emerald-900/80"></span>
+                <span class="w-3 h-3 rounded-sm bg-emerald-600/80"></span>
+                <span class="w-3 h-3 rounded-sm bg-emerald-500"></span>
+                <span class="w-3 h-3 rounded-sm bg-emerald-400"></span>
+                <span>More</span>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto no-scrollbar pb-2">
+              <div id="github-heatmap-grid" class="inline-grid grid-rows-7 grid-flow-col gap-1.5 min-w-max"></div>
+            </div>
+            <div class="mt-3 flex flex-wrap items-center justify-between text-xs text-slate-500 dark:text-slate-400 gap-2 pt-3 border-t border-slate-200/60 dark:border-slate-800/60">
+              <span id="heatmap-summary-text">0 total check-ins in the last 90 days</span>
+              <span id="heatmap-active-days">0 active days</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== TAB 4: ANALYTICS & PORTABLE DATA ==================== -->
+        <section id="tab-analytics" class="hidden space-y-6">
+          <!-- Pillar Alignment Breakdown -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="p-5 sm:p-6 rounded-3xl bg-white/85 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800/80 glass-card">
+              <h3 class="font-bold text-base sm:text-lg mb-1 flex items-center gap-2">
+                <i data-lucide="layers" class="w-4 h-4 text-indigo-400"></i>
+                Life Pillar Balance
+              </h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mb-5">Vision progress vs. 7-day habit execution across your 4 core pillars</p>
+              <div id="pillar-analytics-bars" class="space-y-4"></div>
+            </div>
+
+            <!-- Portability & iPhone Sync Hub -->
+            <div class="p-5 sm:p-6 rounded-3xl bg-white/85 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800/80 glass-card flex flex-col justify-between">
+              <div>
+                <h3 class="font-bold text-base sm:text-lg mb-1 flex items-center gap-2">
+                  <i data-lucide="hard-drive-download" class="w-4 h-4 text-cyan-400"></i>
+                  Data Persistence & Portability
+                </h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mb-5">
+                  All changes save automatically to your browser's <code class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-[11px]">localStorage</code>. Use the tools below to back up or transfer between Desktop and iPhone Safari.
+                </p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <button onclick="exportJSON()" class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-indigo-500/50 bg-slate-50/70 dark:bg-slate-925/70 flex items-center gap-3 text-left transition-all group">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <i data-lucide="download" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                      <div class="font-bold text-sm">Export JSON Backup</div>
+                      <div class="text-[11px] text-slate-500 dark:text-slate-400">Full visions, habits & history</div>
+                    </div>
+                  </button>
+
+                  <label class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-emerald-500/50 bg-slate-50/70 dark:bg-slate-925/70 flex items-center gap-3 text-left transition-all cursor-pointer group">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <i data-lucide="upload" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                      <div class="font-bold text-sm">Import JSON Backup</div>
+                      <div class="text-[11px] text-slate-500 dark:text-slate-400">Restore or sync from file</div>
+                    </div>
+                    <input type="file" id="import-json-input" accept=".json,application/json" class="hidden" onchange="importJSON(event)" />
+                  </label>
+
+                  <button onclick="exportHabitsCSV()" class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-cyan-500/50 bg-slate-50/70 dark:bg-slate-925/70 flex items-center gap-3 text-left transition-all group">
+                    <div class="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-500 flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                      <div class="font-bold text-sm">Export Habits to CSV</div>
+                      <div class="text-[11px] text-slate-500 dark:text-slate-400">Spreadsheet-ready log matrix</div>
+                    </div>
+                  </button>
+
+                  <button onclick="openResetConfirmModal()" class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-rose-500/50 bg-slate-50/70 dark:bg-slate-925/70 flex items-center gap-3 text-left transition-all group">
+                    <div class="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                      <div class="font-bold text-sm">Reset Sample Data</div>
+                      <div class="text-[11px] text-slate-500 dark:text-slate-400">Restore default presets</div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              <!-- iOS Safari PWA Tip -->
+              <div class="mt-6 p-4 rounded-2xl bg-slate-100 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 flex items-start gap-3">
+                <i data-lucide="smartphone" class="w-5 h-5 text-indigo-400 shrink-0 mt-0.5"></i>
+                <div class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                  <span class="font-bold text-slate-900 dark:text-white">iPhone Home Screen App:</span> Open in iOS Safari, tap <span class="font-semibold">Share</span> → <span class="font-semibold">Add to Home Screen</span> for a full-screen native experience with safe-area bottom navigation.
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Mobile Bottom Navigation Bar (iOS Safari Optimized) -->
+  <nav class="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/90 dark:bg-slate-950/90 glass-card border-t border-slate-200/80 dark:border-slate-800/80 px-2 pt-1.5 safe-nav-pb">
+    <div class="grid grid-cols-4 gap-1 max-w-md mx-auto">
+      <button onclick="switchTab('dashboard')" data-tab="dashboard" class="mobile-nav-btn flex flex-col items-center justify-center py-1.5 rounded-2xl transition-all">
+        <i data-lucide="layout-grid" class="w-5 h-5"></i>
+        <span class="text-[10px] font-semibold mt-1">Dashboard</span>
+      </button>
+      <button onclick="switchTab('vision')" data-tab="vision" class="mobile-nav-btn flex flex-col items-center justify-center py-1.5 rounded-2xl transition-all">
+        <i data-lucide="sparkles" class="w-5 h-5"></i>
+        <span class="text-[10px] font-semibold mt-1">Vision Board</span>
+      </button>
+      <button onclick="switchTab('habits')" data-tab="habits" class="mobile-nav-btn flex flex-col items-center justify-center py-1.5 rounded-2xl transition-all">
+        <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+        <span class="text-[10px] font-semibold mt-1">Habits</span>
+      </button>
+      <button onclick="switchTab('analytics')" data-tab="analytics" class="mobile-nav-btn flex flex-col items-center justify-center py-1.5 rounded-2xl transition-all">
+        <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+        <span class="text-[10px] font-semibold mt-1">Analytics</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ==================== MODAL 1: ADD / EDIT VISION CARD ==================== -->
+  <div id="vision-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm overflow-y-auto">
+    <div class="w-full max-w-xl rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden my-8">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800">
+        <h3 id="vision-modal-title" class="font-bold text-lg">Create Vision Card</h3>
+        <button onclick="closeVisionModal()" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="vision-form" onsubmit="saveVisionCard(event)" class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+        <input type="hidden" id="vision-id" />
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Vision Title *</label>
+          <input type="text" id="vision-title" required placeholder="e.g., AI & Mechanistic Modeling Mastery" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Life Pillar *</label>
+            <select id="vision-pillar" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="tech">Technical & AI</option>
+              <option value="career">Career & Leadership</option>
+              <option value="family">Family & Wealth</option>
+              <option value="health">Health & Vitality</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Target Horizon *</label>
+            <input type="date" id="vision-date" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Core Motivation ("Your Why") *</label>
+          <textarea id="vision-why" rows="2" required placeholder="Why does achieving this matter deeply to your future?" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+        </div>
+
+        <!-- Visual Cover Presets or Custom URL -->
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Visual Cover Preset or Image URL</label>
+          <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-2.5" id="cover-preset-buttons">
+            <button type="button" onclick="selectCoverPreset('https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=900&q=80')" class="h-12 rounded-xl overflow-hidden border-2 border-transparent hover:border-indigo-500 focus:border-indigo-500 relative group">
+              <img src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=300&q=60" alt="AI" class="w-full h-full object-cover" />
+              <span class="absolute inset-0 bg-slate-950/40 flex items-center justify-center text-[10px] font-bold text-white">AI/Tech</span>
+            </button>
+            <button type="button" onclick="selectCoverPreset('https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=900&q=80')" class="h-12 rounded-xl overflow-hidden border-2 border-transparent hover:border-indigo-500 focus:border-indigo-500 relative group">
+              <img src="https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=300&q=60" alt="Bioprocess" class="w-full h-full object-cover" />
+              <span class="absolute inset-0 bg-slate-950/40 flex items-center justify-center text-[10px] font-bold text-white">Lab/Bio</span>
+            </button>
+            <button type="button" onclick="selectCoverPreset('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=900&q=80')" class="h-12 rounded-xl overflow-hidden border-2 border-transparent hover:border-indigo-500 focus:border-indigo-500 relative group">
+              <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=300&q=60" alt="Estate" class="w-full h-full object-cover" />
+              <span class="absolute inset-0 bg-slate-950/40 flex items-center justify-center text-[10px] font-bold text-white">Estate</span>
+            </button>
+            <button type="button" onclick="selectCoverPreset('https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=900&q=80')" class="h-12 rounded-xl overflow-hidden border-2 border-transparent hover:border-indigo-500 focus:border-indigo-500 relative group">
+              <img src="https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=300&q=60" alt="Fitness" class="w-full h-full object-cover" />
+              <span class="absolute inset-0 bg-slate-950/40 flex items-center justify-center text-[10px] font-bold text-white">Vitality</span>
+            </button>
+            <button type="button" onclick="selectCoverPreset('gradient-indigo')" class="h-12 rounded-xl bg-gradient-to-br from-indigo-600 via-violet-600 to-cyan-500 flex items-center justify-center text-[10px] font-bold text-white border-2 border-transparent hover:border-white">
+              Cyber Glow
+            </button>
+            <button type="button" onclick="selectCoverPreset('gradient-emerald')" class="h-12 rounded-xl bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-600 flex items-center justify-center text-[10px] font-bold text-white border-2 border-transparent hover:border-white">
+              Bio Pulse
+            </button>
+          </div>
+          <input type="text" id="vision-image" placeholder="Paste Unsplash URL or select a preset above" class="w-full px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+        </div>
+
+        <!-- Milestones List Input -->
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Key Milestones (One per line)</label>
+          <textarea id="vision-milestones" rows="4" placeholder="Build automated hybrid neural-mechanistic pipeline&#10;Publish internal validation framework&#10;Deploy interactive simulator app" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+          <p class="text-[11px] text-slate-400 mt-1">Each line becomes an interactive check-off milestone that drives your Vision card progress bar.</p>
+        </div>
+
+        <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-200 dark:border-slate-800">
+          <button type="button" onclick="closeVisionModal()" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+            Cancel
+          </button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md shadow-indigo-500/20">
+            Save Vision Card
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 2: ADD / EDIT HABIT ==================== -->
+  <div id="habit-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm">
+    <div class="w-full max-w-md rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800">
+        <h3 id="habit-modal-title" class="font-bold text-lg">New Habit Ritual</h3>
+        <button onclick="closeHabitModal()" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="habit-form" onsubmit="saveHabit(event)" class="p-6 space-y-4">
+        <input type="hidden" id="habit-id" />
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Habit Name *</label>
+          <input type="text" id="habit-title" required placeholder="e.g., 30m Vibe Coding / AI Exploration" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Life Pillar *</label>
+            <select id="habit-pillar" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <option value="tech">Technical & AI</option>
+              <option value="career">Career & Leadership</option>
+              <option value="family">Family & Wealth</option>
+              <option value="health">Health & Vitality</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Weekly Target *</label>
+            <select id="habit-target" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <option value="7">Daily (7x / week)</option>
+              <option value="6">6x / week</option>
+              <option value="5">5x / week (Weekdays)</option>
+              <option value="4">4x / week</option>
+              <option value="3">3x / week</option>
+              <option value="2">2x / week</option>
+              <option value="1">1x / week</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-200 dark:border-slate-800">
+          <button type="button" onclick="closeHabitModal()" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+            Cancel
+          </button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-md shadow-emerald-500/20">
+            Save Habit
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 3: CONFIRMATION DIALOG ==================== -->
+  <div id="confirm-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm">
+    <div class="w-full max-w-sm rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 shadow-2xl">
+      <div class="w-11 h-11 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center mb-4">
+        <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+      </div>
+      <h4 id="confirm-title" class="font-bold text-base">Confirm Action</h4>
+      <p id="confirm-message" class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">Are you sure you want to proceed?</p>
+      <div class="flex items-center justify-end gap-2.5 mt-6">
+        <button onclick="closeConfirmModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">
+          Cancel
+        </button>
+        <button id="confirm-action-btn" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold">
+          Confirm
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed top-5 right-5 z-50 hidden items-center gap-2.5 px-4 py-3 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-semibold shadow-xl border border-slate-700/50 transition-all">
+    <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400 dark:text-emerald-600"></i>
+    <span id="toast-text">Saved</span>
+  </div>
+
+  <!-- ==================== APPLICATION LOGIC ==================== -->
+  <script>
+    const STORAGE_KEY = 'apex_vision_habit_os_v1';
+
+    const PILLARS = {
+      tech: {
+        id: 'tech',
+        name: 'Technical & AI',
+        badgeBg: 'bg-cyan-500/15 text-cyan-600 dark:text-cyan-300 border-cyan-500/30',
+        dot: 'bg-cyan-400',
+        bar: 'from-cyan-500 to-sky-400',
+        accent: 'text-cyan-400'
+      },
+      career: {
+        id: 'career',
+        name: 'Career & Leadership',
+        badgeBg: 'bg-violet-500/15 text-violet-600 dark:text-violet-300 border-violet-500/30',
+        dot: 'bg-violet-400',
+        bar: 'from-violet-500 to-indigo-400',
+        accent: 'text-violet-400'
+      },
+      family: {
+        id: 'family',
+        name: 'Family & Wealth',
+        badgeBg: 'bg-amber-500/15 text-amber-600 dark:text-amber-300 border-amber-500/30',
+        dot: 'bg-amber-400',
+        bar: 'from-amber-500 to-orange-400',
+        accent: 'text-amber-400'
+      },
+      health: {
+        id: 'health',
+        name: 'Health & Vitality',
+        badgeBg: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 border-emerald-500/30',
+        dot: 'bg-emerald-400',
+        bar: 'from-emerald-500 to-teal-400',
+        accent: 'text-emerald-400'
+      }
+    };
+
+    // Helper for YYYY-MM-DD local date formatting
+    function formatDateKey(dateObj) {
+      const y = dateObj.getFullYear();
+      const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const d = String(dateObj.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function getOffsetDateKey(daysAgo) {
+      const d = new Date();
+      d.setHours(12, 0, 0, 0);
+      d.setDate(d.getDate() - daysAgo);
+      return formatDateKey(d);
+    }
+
+    // Generate realistic pre-populated history for sample habits
+    function generateSampleHistory(patternIndices) {
+      const history = {};
+      for (let i = 0; i < 65; i++) {
+        if (patternIndices.includes(i % 7) || (i < 5 && patternIndices.length >= 5)) {
+          // Add slight organic variation for older weeks
+          if (i > 14 && (i * 13) % 9 === 0) continue;
+          history[getOffsetDateKey(i)] = true;
+        }
+      }
+      return history;
+    }
+
+    function getDefaultState() {
+      return {
+        theme: 'dark',
+        activeTab: 'dashboard',
+        pillarFilter: 'all',
+        visions: [
+          {
+            id: 'v-tech-1',
+            title: 'AI & Mechanistic Modeling Mastery',
+            pillar: 'tech',
+            targetDate: '2027-06-30',
+            image: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=900&q=80',
+            why: 'Synthesize deep bioprocess domain expertise with modern AI agents, hybrid mechanistic modeling, and rapid vibe-coded scientific tools.',
+            milestones: [
+              { id: 'm1', text: 'Architect hybrid neural-mechanistic fermentation model template', done: true },
+              { id: 'm2', text: 'Ship 5 interactive internal web apps for DOE & data visualization', done: true },
+              { id: 'm3', text: 'Automate routine parameter estimation & sensitivity workflows', done: false },
+              { id: 'm4', text: 'Lead technical workshop on AI-augmented bioprocess engineering', done: false }
+            ]
+          },
+          {
+            id: 'v-career-1',
+            title: 'Bioprocess Leadership & Tech Transfer Excellence',
+            pillar: 'career',
+            targetDate: '2027-03-31',
+            image: 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=900&q=80',
+            why: 'Elevate cross-site scale-up predictability, mentor rising scientists, and establish gold-standard digital tech transfer protocols.',
+            milestones: [
+              { id: 'm5', text: 'Standardize scale-down qualification & kLa / power-per-volume Playbook', done: true },
+              { id: 'm6', text: 'Zero critical deviations across Q1/Q2 late-stage tech transfer runs', done: true },
+              { id: 'm7', text: 'Mentor 3 senior engineers on DOE & mechanistic scale-up strategy', done: false },
+              { id: 'm8', text: 'Present cross-functional digital twin roadmap to executive leadership', done: false }
+            ]
+          },
+          {
+            id: 'v-family-1',
+            title: 'Family Estate & Long-Term Generational Wealth',
+            pillar: 'family',
+            targetDate: '2027-12-31',
+            image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=900&q=80',
+            why: 'Build fortress financial independence, intentional family memories, and a resilient coastal home sanctuary.',
+            milestones: [
+              { id: 'm9', text: 'Complete comprehensive estate plan, trust review & asset allocation', done: true },
+              { id: 'm10', text: 'Automate monthly tax-advantaged & brokerage investment cadence', done: true },
+              { id: 'm11', text: 'Execute summer family adventure & unplugged coastal retreat', done: true },
+              { id: 'm12', text: 'Hit annual net-worth compounding & college fund milestone', done: false }
+            ]
+          },
+          {
+            id: 'v-health-1',
+            title: 'Peak Daily Energy, Strength & Longevity',
+            pillar: 'health',
+            targetDate: '2027-05-01',
+            image: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=900&q=80',
+            why: 'Sustain sharp cognitive clarity and physical resilience to show up at 100% for family and high-leverage work.',
+            milestones: [
+              { id: 'm13', text: 'Maintain 4x/week strength + Zone 2 cardiovascular conditioning', done: true },
+              { id: 'm14', text: 'Lock in 7.5+ hr sleep architecture with zero late-night screens', done: false },
+              { id: 'm15', text: 'Complete annual metabolic & cardiovascular biomarker panel', done: true },
+              { id: 'm16', text: 'Hit target VO2 max and functional strength benchmarks', done: false }
+            ]
+          }
+        ],
+        habits: [
+          {
+            id: 'h-1',
+            title: '30m Vibe Coding / AI Exploration',
+            pillar: 'tech',
+            weeklyTarget: 5,
+            history: generateSampleHistory([0, 1, 2, 4, 5])
+          },
+          {
+            id: 'h-2',
+            title: 'Deep Work: Modeling & DOE Architecture',
+            pillar: 'career',
+            weeklyTarget: 5,
+            history: generateSampleHistory([0, 1, 3, 4, 6])
+          },
+          {
+            id: 'h-3',
+            title: 'Family Unplugged Evening (No Work Screens)',
+            pillar: 'family',
+            weeklyTarget: 7,
+            history: generateSampleHistory([0, 1, 2, 3, 4, 5, 6])
+          },
+          {
+            id: 'h-4',
+            title: 'Strength / Zone 2 Active Movement',
+            pillar: 'health',
+            weeklyTarget: 5,
+            history: generateSampleHistory([0, 2, 3, 5, 6])
+          },
+          {
+            id: 'h-5',
+            title: 'Weekly Financial, Estate & Portfolio Pulse',
+            pillar: 'family',
+            weeklyTarget: 2,
+            history: generateSampleHistory([0, 3])
+          }
+        ]
+      };
+    }
+
+    let state = loadState();
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return getDefaultState();
+        const parsed = JSON.parse(raw);
+        return {
+          ...getDefaultState(),
+          ...parsed,
+          visions: Array.isArray(parsed.visions) ? parsed.visions : getDefaultState().visions,
+          habits: Array.isArray(parsed.habits) ? parsed.habits : getDefaultState().habits
+        };
+      } catch (e) {
+        console.error('Error loading state:', e);
+        return getDefaultState();
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        console.error('Error saving state:', e);
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const text = document.getElementById('toast-text');
+      text.textContent = msg;
+      toast.classList.remove('hidden');
+      toast.classList.add('flex');
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => {
+        toast.classList.add('hidden');
+        toast.classList.remove('flex');
+      }, 2400);
+    }
+
+    // ==================== THEME & NAVIGATION ====================
+    function applyTheme() {
+      const root = document.documentElement;
+      if (state.theme === 'dark') {
+        root.classList.add('dark');
+      } else {
+        root.classList.remove('dark');
+      }
+    }
+
+    function toggleTheme() {
+      state.theme = state.theme === 'dark' ? 'light' : 'dark';
+      applyTheme();
+      saveState();
+    }
+
+    function switchTab(tabId) {
+      state.activeTab = tabId;
+      saveState();
+      renderAll();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function setPillarFilter(pillar) {
+      state.pillarFilter = pillar;
+      saveState();
+      renderAll();
+    }
+
+    // ==================== STREAK & METRIC CALCULATIONS ====================
+    function calculateHabitStreak(history) {
+      let current = 0;
+      const todayKey = getOffsetDateKey(0);
+      const yesterdayKey = getOffsetDateKey(1);
+
+      // Start counting from today if checked, otherwise from yesterday
+      let startOffset = history[todayKey] ? 0 : (history[yesterdayKey] ? 1 : -1);
+      if (startOffset !== -1) {
+        for (let i = startOffset; i < 365; i++) {
+          if (history[getOffsetDateKey(i)]) {
+            current++;
+          } else {
+            break;
+          }
+        }
+      }
+
+      // Calculate best streak over the past 180 days
+      let best = 0;
+      let temp = 0;
+      for (let i = 180; i >= 0; i--) {
+        if (history[getOffsetDateKey(i)]) {
+          temp++;
+          if (temp > best) best = temp;
+        } else {
+          temp = 0;
+        }
+      }
+      return { current, best: Math.max(current, best) };
+    }
+
+    function getLast7DaysCount(history) {
+      let count = 0;
+      for (let i = 0; i < 7; i++) {
+        if (history[getOffsetDateKey(i)]) count++;
+      }
+      return count;
+    }
+
+    function getVisionProgress(vision) {
+      if (!vision.milestones || vision.milestones.length === 0) return 0;
+      const doneCount = vision.milestones.filter(m => m.done).length;
+      return Math.round((doneCount / vision.milestones.length) * 100);
+    }
+
+    // ==================== INTERACTIVE ACTIONS ====================
+    function toggleHabitDate(habitId, dateKey) {
+      const habit = state.habits.find(h => h.id === habitId);
+      if (!habit) return;
+      if (!habit.history) habit.history = {};
+      if (habit.history[dateKey]) {
+        delete habit.history[dateKey];
+      } else {
+        habit.history[dateKey] = true;
+      }
+      saveState();
+      renderAll();
+    }
+
+    function toggleVisionMilestone(visionId, milestoneId) {
+      const vision = state.visions.find(v => v.id === visionId);
+      if (!vision) return;
+      const milestone = vision.milestones.find(m => m.id === milestoneId);
+      if (!milestone) return;
+      milestone.done = !milestone.done;
+      saveState();
+      renderAll();
+    }
+
+    // ==================== VISION MODAL CRUD ====================
+    function selectCoverPreset(urlOrGradient) {
+      document.getElementById('vision-image').value = urlOrGradient;
+    }
+
+    function openVisionModal(visionId = null) {
+      const modal = document.getElementById('vision-modal');
+      const titleEl = document.getElementById('vision-modal-title');
+      const form = document.getElementById('vision-form');
+      form.reset();
+
+      if (visionId) {
+        const v = state.visions.find(item => item.id === visionId);
+        if (!v) return;
+        titleEl.textContent = 'Edit Vision Card';
+        document.getElementById('vision-id').value = v.id;
+        document.getElementById('vision-title').value = v.title;
+        document.getElementById('vision-pillar').value = v.pillar;
+        document.getElementById('vision-date').value = v.targetDate;
+        document.getElementById('vision-why').value = v.why;
+        document.getElementById('vision-image').value = v.image || '';
+        document.getElementById('vision-milestones').value = (v.milestones || []).map(m => m.text).join('\n');
+      } else {
+        titleEl.textContent = 'Create Vision Card';
+        document.getElementById('vision-id').value = '';
+        document.getElementById('vision-pillar').value = state.pillarFilter !== 'all' ? state.pillarFilter : 'tech';
+        document.getElementById('vision-date').value = '2027-12-31';
+        document.getElementById('vision-image').value = 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=900&q=80';
+      }
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeVisionModal() {
+      const modal = document.getElementById('vision-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function saveVisionCard(e) {
+      e.preventDefault();
+      const id = document.getElementById('vision-id').value;
+      const title = document.getElementById('vision-title').value.trim();
+      const pillar = document.getElementById('vision-pillar').value;
+      const targetDate = document.getElementById('vision-date').value;
+      const why = document.getElementById('vision-why').value.trim();
+      const image = document.getElementById('vision-image').value.trim() || 'gradient-indigo';
+      const rawMilestones = document.getElementById('vision-milestones').value
+        .split('\n')
+        .map(s => s.trim())
+        .filter(Boolean);
+
+      if (id) {
+        const existing = state.visions.find(v => v.id === id);
+        if (existing) {
+          // Preserve completion state of matching milestone texts
+          const oldMap = {};
+          (existing.milestones || []).forEach(m => { oldMap[m.text.toLowerCase()] = m.done; });
+          existing.title = title;
+          existing.pillar = pillar;
+          existing.targetDate = targetDate;
+          existing.why = why;
+          existing.image = image;
+          existing.milestones = rawMilestones.map((text, idx) => ({
+            id: 'm-' + Date.now() + '-' + idx,
+            text,
+            done: !!oldMap[text.toLowerCase()]
+          }));
+        }
+        showToast('Vision Card updated');
+      } else {
+        state.visions.unshift({
+          id: 'v-' + Date.now(),
+          title,
+          pillar,
+          targetDate,
+          why,
+          image,
+          milestones: rawMilestones.map((text, idx) => ({
+            id: 'm-' + Date.now() + '-' + idx,
+            text,
+            done: false
+          }))
+        });
+        showToast('Vision Card added');
+      }
+
+      saveState();
+      closeVisionModal();
+      renderAll();
+    }
+
+    function confirmDeleteVision(visionId) {
+      const v = state.visions.find(item => item.id === visionId);
+      if (!v) return;
+      openConfirmModal(
+        'Delete Vision Card?',
+        `Are you sure you want to remove "${v.title}" from your Vision Board?`,
+        () => {
+          state.visions = state.visions.filter(item => item.id !== visionId);
+          saveState();
+          renderAll();
+          showToast('Vision deleted');
+        }
+      );
+    }
+
+    // ==================== HABIT MODAL CRUD ====================
+    function openHabitModal(habitId = null) {
+      const modal = document.getElementById('habit-modal');
+      const titleEl = document.getElementById('habit-modal-title');
+      const form = document.getElementById('habit-form');
+      form.reset();
+
+      if (habitId) {
+        const h = state.habits.find(item => item.id === habitId);
+        if (!h) return;
+        titleEl.textContent = 'Edit Habit Ritual';
+        document.getElementById('habit-id').value = h.id;
+        document.getElementById('habit-title').value = h.title;
+        document.getElementById('habit-pillar').value = h.pillar;
+        document.getElementById('habit-target').value = String(h.weeklyTarget || 5);
+      } else {
+        titleEl.textContent = 'New Habit Ritual';
+        document.getElementById('habit-id').value = '';
+        document.getElementById('habit-pillar').value = state.pillarFilter !== 'all' ? state.pillarFilter : 'tech';
+        document.getElementById('habit-target').value = '5';
+      }
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeHabitModal() {
+      const modal = document.getElementById('habit-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function saveHabit(e) {
+      e.preventDefault();
+      const id = document.getElementById('habit-id').value;
+      const title = document.getElementById('habit-title').value.trim();
+      const pillar = document.getElementById('habit-pillar').value;
+      const weeklyTarget = parseInt(document.getElementById('habit-target').value, 10) || 5;
+
+      if (id) {
+        const existing = state.habits.find(h => h.id === id);
+        if (existing) {
+          existing.title = title;
+          existing.pillar = pillar;
+          existing.weeklyTarget = weeklyTarget;
+        }
+        showToast('Habit updated');
+      } else {
+        state.habits.push({
+          id: 'h-' + Date.now(),
+          title,
+          pillar,
+          weeklyTarget,
+          history: {}
+        });
+        showToast('Habit created');
+      }
+
+      saveState();
+      closeHabitModal();
+      renderAll();
+    }
+
+    function confirmDeleteHabit(habitId) {
+      const h = state.habits.find(item => item.id === habitId);
+      if (!h) return;
+      openConfirmModal(
+        'Delete Habit?',
+        `Remove "${h.title}" and its check-in history?`,
+        () => {
+          state.habits = state.habits.filter(item => item.id !== habitId);
+          saveState();
+          renderAll();
+          showToast('Habit removed');
+        }
+      );
+    }
+
+    // ==================== CONFIRM MODAL ====================
+    let _confirmCallback = null;
+    function openConfirmModal(title, message, onConfirm) {
+      document.getElementById('confirm-title').textContent = title;
+      document.getElementById('confirm-message').textContent = message;
+      _confirmCallback = onConfirm;
+      const modal = document.getElementById('confirm-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeConfirmModal() {
+      const modal = document.getElementById('confirm-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      _confirmCallback = null;
+    }
+
+    document.getElementById('confirm-action-btn').addEventListener('click', () => {
+      if (typeof _confirmCallback === 'function') _confirmCallback();
+      closeConfirmModal();
+    });
+
+    function openResetConfirmModal() {
+      openConfirmModal(
+        'Reset to Default Presets?',
+        'This will restore the default sample Vision Cards and Habits. Export a JSON backup first if you want to keep your current custom entries.',
+        () => {
+          state = getDefaultState();
+          saveState();
+          applyTheme();
+          renderAll();
+          showToast('Default sample data restored');
+        }
+      );
+    }
+
+    // ==================== DATA EXPORT & IMPORT ====================
+    function exportJSON() {
+      const dataStr = JSON.stringify(state, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `apex-vision-habits-${formatDateKey(new Date())}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('JSON backup exported');
+    }
+
+    function importJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (!imported.visions || !imported.habits) {
+            showToast('Invalid JSON backup file');
+            return;
+          }
+          state = {
+            ...getDefaultState(),
+            ...imported
+          };
+          saveState();
+          applyTheme();
+          renderAll();
+          showToast('Backup imported successfully!');
+        } catch (err) {
+          showToast('Failed to parse JSON file');
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    function exportHabitsCSV() {
+      // Build 30-day date columns
+      const dates = [];
+      for (let i = 29; i >= 0; i--) {
+        dates.push(getOffsetDateKey(i));
+      }
+      const headers = ['Habit Title', 'Pillar', 'Weekly Target', 'Current Streak', 'Best Streak', ...dates];
+      const rows = state.habits.map(h => {
+        const pName = (PILLARS[h.pillar] || PILLARS.tech).name;
+        const streaks = calculateHabitStreak(h.history || {});
+        const dateCells = dates.map(d => (h.history && h.history[d] ? '1' : '0'));
+        const safeTitle = `"${h.title.replace(/"/g, '""')}"`;
+        return [safeTitle, `"${pName}"`, h.weeklyTarget, streaks.current, streaks.best, ...dateCells].join(',');
+      });
+
+      const csvContent = [headers.join(','), ...rows].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `apex-habits-${formatDateKey(new Date())}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Habits exported to CSV');
+    }
+
+    // ==================== RENDER FUNCTIONS ====================
+    function renderVisionCardHTML(v, compact = false) {
+      const pillar = PILLARS[v.pillar] || PILLARS.tech;
+      const pct = getVisionProgress(v);
+      const doneCount = (v.milestones || []).filter(m => m.done).length;
+      const totalCount = (v.milestones || []).length;
+
+      let coverHTML = '';
+      if (v.image === 'gradient-indigo') {
+        coverHTML = `<div class="w-full h-full bg-gradient-to-br from-indigo-600 via-violet-600 to-cyan-500"></div>`;
+      } else if (v.image === 'gradient-emerald') {
+        coverHTML = `<div class="w-full h-full bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-600"></div>`;
+      } else {
+        coverHTML = `<img src="${v.image}" alt="${v.title}" onerror="this.onerror=null;this.src='https://placehold.co/800x400/1e293b/94a3b8?text=Vision+Card';" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />`;
+      }
+
+      const milestonesToShow = compact ? (v.milestones || []).slice(0, 3) : (v.milestones || []);
+
+      return `
+        <div class="group rounded-3xl bg-white dark:bg-slate-925/90 border border-slate-200/80 dark:border-slate-800/90 overflow-hidden shadow-sm hover:shadow-xl hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between">
+          <div>
+            <!-- Visual Cover Banner -->
+            <div class="relative ${compact ? 'h-36' : 'h-44'} w-full overflow-hidden bg-slate-900">
+              ${coverHTML}
+              <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/45 to-transparent"></div>
+
+              <!-- Top Badges -->
+              <div class="absolute top-3 left-3 right-3 flex items-center justify-between gap-2">
+                <span class="px-2.5 py-1 rounded-full text-[11px] font-bold border backdrop-blur-md bg-slate-950/60 text-white border-white/15 flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full ${pillar.dot}"></span>
+                  ${pillar.name}
+                </span>
+                <div class="flex items-center gap-1">
+                  <button onclick="openVisionModal('${v.id}')" title="Edit Vision" class="p-1.5 rounded-xl bg-slate-950/60 hover:bg-slate-900 text-slate-200 backdrop-blur-md border border-white/10 transition-colors">
+                    <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                  </button>
+                  <button onclick="confirmDeleteVision('${v.id}')" title="Delete Vision" class="p-1.5 rounded-xl bg-slate-950/60 hover:bg-rose-600 text-slate-200 hover:text-white backdrop-blur-md border border-white/10 transition-colors">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Bottom Overlay Title & Target Date -->
+              <div class="absolute bottom-3 left-4 right-4">
+                <div class="flex items-center gap-1.5 text-[11px] text-slate-300 font-medium mb-0.5">
+                  <i data-lucide="calendar" class="w-3 h-3 text-indigo-400"></i>
+                  <span>Target: ${v.targetDate}</span>
+                </div>
+                <h4 class="font-extrabold text-white text-base sm:text-lg leading-snug line-clamp-1">${v.title}</h4>
+              </div>
+            </div>
+
+            <!-- Why / Core Motivation -->
+            <div class="p-4 sm:p-5 space-y-4">
+              <div class="p-3 rounded-2xl bg-slate-100/80 dark:bg-slate-900/90 border border-slate-200/60 dark:border-slate-800/80">
+                <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-0.5">Why It Matters</p>
+                <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed ${compact ? 'line-clamp-2' : ''}">${v.why}</p>
+              </div>
+
+              <!-- Interactive Milestones Checklist -->
+              <div class="space-y-1.5">
+                <div class="flex items-center justify-between text-xs mb-2">
+                  <span class="font-bold text-slate-700 dark:text-slate-200">Key Milestones (${doneCount}/${totalCount})</span>
+                  <span class="font-extrabold ${pillar.accent}">${pct}%</span>
+                </div>
+                <div class="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden mb-3">
+                  <div class="h-full bg-gradient-to-r ${pillar.bar} rounded-full transition-all duration-500" style="width: ${pct}%"></div>
+                </div>
+
+                <div class="space-y-1.5">
+                  ${milestonesToShow.map(m => `
+                    <button onclick="toggleVisionMilestone('${v.id}', '${m.id}')" class="w-full flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/60 text-left transition-colors group/ms">
+                      <span class="mt-0.5 w-4 h-4 rounded-md flex items-center justify-center shrink-0 border transition-all ${
+                        m.done
+                          ? 'bg-emerald-500 border-emerald-500 text-white'
+                          : 'border-slate-300 dark:border-slate-600 group-hover/ms:border-indigo-400'
+                      }">
+                        ${m.done ? '<i data-lucide="check" class="w-3 h-3"></i>' : ''}
+                      </span>
+                      <span class="text-xs leading-snug ${m.done ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-700 dark:text-slate-200 font-medium'}">${m.text}</span>
+                    </button>
+                  `).join('')}
+                  ${compact && totalCount > 3 ? `
+                    <button onclick="switchTab('vision')" class="text-[11px] font-semibold text-indigo-400 hover:underline pl-2 pt-1">
+                      + ${totalCount - 3} more milestone${totalCount - 3 > 1 ? 's' : ''}
+                    </button>
+                  ` : ''}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderAll() {
+      // Update Header Date
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+      const mobileDateEl = document.getElementById('mobile-date-sub');
+      if (mobileDateEl) mobileDateEl.textContent = dateStr;
+
+      // Update Active Tab Visibility
+      const tabs = ['dashboard', 'vision', 'habits', 'analytics'];
+      tabs.forEach(t => {
+        const sec = document.getElementById(`tab-${t}`);
+        if (sec) {
+          if (state.activeTab === t) sec.classList.remove('hidden');
+          else sec.classList.add('hidden');
+        }
+      });
+
+      // Titles per view
+      const titles = {
+        dashboard: ['Command Center', 'Align daily execution with long-term life architecture.'],
+        vision: ['Vision Architecture', 'Bento board of long-term horizons and interactive key results.'],
+        habits: ['Daily Ritual System', '1-tap check-ins, 7-day rolling window, and 90-day consistency matrix.'],
+        analytics: ['Analytics & Portable Sync', 'Pillar alignment metrics and 1-click JSON/CSV backup tools.']
+      };
+      const [vTitle, vSub] = titles[state.activeTab] || titles.dashboard;
+      document.getElementById('view-title').textContent = vTitle;
+      document.getElementById('view-subtitle').textContent = vSub;
+
+      // Highlight Nav Buttons
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        const isActive = btn.dataset.tab === state.activeTab;
+        btn.className = `nav-btn w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-sm font-semibold transition-all ${
+          isActive
+            ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/25'
+            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/70'
+        }`;
+      });
+
+      document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
+        const isActive = btn.dataset.tab === state.activeTab;
+        btn.className = `mobile-nav-btn flex flex-col items-center justify-center py-1.5 rounded-2xl transition-all ${
+          isActive
+            ? 'text-indigo-500 dark:text-indigo-400 bg-indigo-500/10'
+            : 'text-slate-400 dark:text-slate-500'
+        }`;
+      });
+
+      // Highlight Pillar Filter Pills
+      document.querySelectorAll('.pillar-pill').forEach(pill => {
+        const isActive = pill.dataset.pillar === state.pillarFilter;
+        pill.className = `pillar-pill shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1.5 ${
+          isActive
+            ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm'
+            : 'bg-white/80 dark:bg-slate-900/80 text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-800 hover:border-slate-400'
+        }`;
+      });
+
+      // Filtered Collections
+      const filteredVisions = state.pillarFilter === 'all'
+        ? state.visions
+        : state.visions.filter(v => v.pillar === state.pillarFilter);
+
+      const filteredHabits = state.pillarFilter === 'all'
+        ? state.habits
+        : state.habits.filter(h => h.pillar === state.pillarFilter);
+
+      // Compute Global KPIs
+      const todayKey = getOffsetDateKey(0);
+      const totalHabitsCount = state.habits.length;
+      const todayDoneCount = state.habits.filter(h => h.history && h.history[todayKey]).length;
+      const todayPct = totalHabitsCount ? Math.round((todayDoneCount / totalHabitsCount) * 100) : 0;
+
+      let topCurrentStreak = 0;
+      let topBestStreak = 0;
+      let rolling7Done = 0;
+      let rolling7Target = 0;
+
+      state.habits.forEach(h => {
+        const s = calculateHabitStreak(h.history || {});
+        if (s.current > topCurrentStreak) topCurrentStreak = s.current;
+        if (s.best > topBestStreak) topBestStreak = s.best;
+        rolling7Done += getLast7DaysCount(h.history || {});
+        rolling7Target += (h.weeklyTarget || 5);
+      });
+
+      const weeklyRate = rolling7Target ? Math.min(100, Math.round((rolling7Done / rolling7Target) * 100)) : 0;
+
+      let totalMilestones = 0;
+      let completedMilestones = 0;
+      state.visions.forEach(v => {
+        (v.milestones || []).forEach(m => {
+          totalMilestones++;
+          if (m.done) completedMilestones++;
+        });
+      });
+      const visionAvgPct = totalMilestones ? Math.round((completedMilestones / totalMilestones) * 100) : 0;
+
+      // Update KPI DOM
+      document.getElementById('kpi-today-done').textContent = `${todayDoneCount}/${totalHabitsCount}`;
+      document.getElementById('kpi-today-pct').textContent = `${todayPct}%`;
+      document.getElementById('kpi-top-streak').textContent = `${topCurrentStreak}d`;
+      document.getElementById('kpi-best-streak').textContent = `Best: ${topBestStreak}d`;
+      document.getElementById('kpi-vision-avg').textContent = `${visionAvgPct}%`;
+      document.getElementById('kpi-vision-milestones').textContent = `${completedMilestones}/${totalMilestones} milestones`;
+      document.getElementById('kpi-weekly-rate').textContent = `${weeklyRate}%`;
+
+      // Sidebar Badges
+      document.getElementById('sidebar-vision-count').textContent = state.visions.length;
+      document.getElementById('sidebar-habit-progress').textContent = `${todayDoneCount}/${totalHabitsCount}`;
+      document.getElementById('sidebar-momentum-pct').textContent = `${todayPct}%`;
+      document.getElementById('sidebar-momentum-bar').style.width = `${todayPct}%`;
+
+      // 1. Render Dashboard Quick Habits
+      const dashHabitEl = document.getElementById('dashboard-habit-list');
+      if (filteredHabits.length === 0) {
+        dashHabitEl.innerHTML = `<div class="p-6 text-center text-xs text-slate-400">No habits in this pillar yet. Tap + Habit to add one.</div>`;
+      } else {
+        dashHabitEl.innerHTML = filteredHabits.map(h => {
+          const isDone = !!(h.history && h.history[todayKey]);
+          const pillar = PILLARS[h.pillar] || PILLARS.tech;
+          const streak = calculateHabitStreak(h.history || {});
+          const weekDone = getLast7DaysCount(h.history || {});
+          return `
+            <div onclick="toggleHabitDate('${h.id}', '${todayKey}')" class="cursor-pointer select-none p-3.5 rounded-2xl border transition-all flex items-center justify-between gap-3 ${
+              isDone
+                ? 'bg-emerald-500/10 border-emerald-500/30 dark:bg-emerald-500/10 dark:border-emerald-500/30'
+                : 'bg-slate-50/80 dark:bg-slate-925/80 border-slate-200/80 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700'
+            }">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-7 h-7 rounded-xl flex items-center justify-center shrink-0 transition-all ${
+                  isDone
+                    ? 'bg-emerald-500 text-white shadow-sm shadow-emerald-500/30 animate-pop'
+                    : 'border-2 border-slate-300 dark:border-slate-700 text-transparent'
+                }">
+                  <i data-lucide="check" class="w-4 h-4"></i>
+                </div>
+                <div class="min-w-0">
+                  <p class="text-xs sm:text-sm font-bold truncate ${isDone ? 'line-through text-slate-400 dark:text-slate-500' : ''}">${h.title}</p>
+                  <div class="flex items-center gap-2 mt-0.5">
+                    <span class="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-400">
+                      <span class="w-1.5 h-1.5 rounded-full ${pillar.dot}"></span>
+                      ${pillar.name}
+                    </span>
+                    <span class="text-[10px] text-slate-400">• ${weekDone}/${h.weeklyTarget}x wk</span>
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-500/10 text-amber-500 text-xs font-bold shrink-0">
+                <i data-lucide="flame" class="w-3.5 h-3.5"></i>
+                <span>${streak.current}d</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Render Mini 28-Day Heatmap on Dashboard
+      const miniHeatEl = document.getElementById('dashboard-mini-heatmap');
+      const miniCells = [];
+      for (let i = 27; i >= 0; i--) {
+        const dKey = getOffsetDateKey(i);
+        const count = state.habits.filter(h => h.history && h.history[dKey]).length;
+        const ratio = totalHabitsCount ? count / totalHabitsCount : 0;
+        let bg = 'bg-slate-200 dark:bg-slate-800';
+        if (ratio > 0 && ratio < 0.4) bg = 'bg-emerald-900/70';
+        else if (ratio >= 0.4 && ratio < 0.75) bg = 'bg-emerald-600';
+        else if (ratio >= 0.75) bg = 'bg-emerald-400';
+        miniCells.push(`<div title="${dKey}: ${count}/${totalHabitsCount} habits" class="h-3.5 rounded-sm ${bg}"></div>`);
+      }
+      miniHeatEl.innerHTML = miniCells.join('');
+      miniHeatEl.style.gridTemplateColumns = 'repeat(14, minmax(0, 1fr))';
+
+      // 2. Render Dashboard Vision Grid (Top 4)
+      const dashVisionEl = document.getElementById('dashboard-vision-grid');
+      if (filteredVisions.length === 0) {
+        dashVisionEl.innerHTML = `<div class="col-span-2 p-8 text-center text-xs text-slate-400">No vision cards match this filter.</div>`;
+      } else {
+        dashVisionEl.innerHTML = filteredVisions.slice(0, 4).map(v => renderVisionCardHTML(v, true)).join('');
+      }
+
+      // 3. Render Full Vision Board Grid
+      const fullVisionEl = document.getElementById('full-vision-grid');
+      if (filteredVisions.length === 0) {
+        fullVisionEl.innerHTML = `<div class="col-span-2 p-12 text-center text-sm text-slate-400">No Vision Cards in this pillar yet. Click "Add Vision Card" to create one.</div>`;
+      } else {
+        fullVisionEl.innerHTML = filteredVisions.map(v => renderVisionCardHTML(v, false)).join('');
+      }
+
+      // 4. Render Full 7-Day Rolling Habit Tracker
+      const rollingDays = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        rollingDays.push({
+          key: getOffsetDateKey(i),
+          dayName: d.toLocaleDateString('en-US', { weekday: 'short' }).slice(0, 2),
+          dayNum: d.getDate(),
+          isToday: i === 0
+        });
+      }
+
+      const fullHabitEl = document.getElementById('full-habit-list');
+      if (filteredHabits.length === 0) {
+        fullHabitEl.innerHTML = `<div class="p-12 text-center text-sm text-slate-400">No habits found for this pillar.</div>`;
+      } else {
+        fullHabitEl.innerHTML = filteredHabits.map(h => {
+          const pillar = PILLARS[h.pillar] || PILLARS.tech;
+          const streak = calculateHabitStreak(h.history || {});
+          const weekDone = getLast7DaysCount(h.history || {});
+          const weekPct = Math.min(100, Math.round((weekDone / (h.weeklyTarget || 5)) * 100));
+
+          return `
+            <div class="p-4 sm:p-5 rounded-3xl bg-white/85 dark:bg-slate-900/85 border border-slate-200/80 dark:border-slate-800/80 glass-card flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <!-- Left Info -->
+              <div class="space-y-1.5 min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${pillar.badgeBg}">${pillar.name}</span>
+                  <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-500">
+                    <i data-lucide="flame" class="w-3 h-3"></i> ${streak.current}d streak (Best: ${streak.best}d)
+                  </span>
+                  <span class="text-[11px] font-semibold text-slate-400">Target: ${weekDone}/${h.weeklyTarget} this week (${weekPct}%)</span>
+                </div>
+                <div class="flex items-center justify-between gap-2">
+                  <h4 class="font-bold text-base sm:text-lg text-slate-900 dark:text-white truncate">${h.title}</h4>
+                  <div class="flex items-center gap-1 lg:hidden">
+                    <button onclick="openHabitModal('${h.id}')" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                      <i data-lucide="pencil" class="w-4 h-4"></i>
+                    </button>
+                    <button onclick="confirmDeleteHabit('${h.id}')" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-500">
+                      <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right 7-Day Rolling Toggle Buttons -->
+              <div class="flex items-center justify-between sm:justify-end gap-2">
+                <div class="grid grid-cols-7 gap-1.5 sm:gap-2 w-full sm:w-auto">
+                  ${rollingDays.map(day => {
+                    const checked = !!(h.history && h.history[day.key]);
+                    return `
+                      <button onclick="toggleHabitDate('${h.id}', '${day.key}')" class="flex flex-col items-center justify-center py-2 px-2.5 sm:px-3 rounded-2xl border transition-all ${
+                        checked
+                          ? 'bg-emerald-500 border-emerald-400 text-white shadow-md shadow-emerald-500/20 animate-pop'
+                          : day.isToday
+                            ? 'bg-indigo-500/10 border-indigo-500/40 text-slate-700 dark:text-slate-200 hover:border-indigo-400'
+                            : 'bg-slate-100/70 dark:bg-slate-800/60 border-slate-200/70 dark:border-slate-700/70 text-slate-500 dark:text-slate-400 hover:border-slate-400'
+                      }">
+                        <span class="text-[9px] font-bold uppercase tracking-tighter ${checked ? 'text-emerald-100' : 'opacity-70'}">${day.isToday ? 'TDY' : day.dayName}</span>
+                        <span class="text-xs font-extrabold mt-0.5">${day.dayNum}</span>
+                      </button>
+                    `;
+                  }).join('')}
+                </div>
+
+                <div class="hidden lg:flex items-center gap-1 pl-2 border-l border-slate-200 dark:border-slate-800">
+                  <button onclick="openHabitModal('${h.id}')" title="Edit Habit" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <i data-lucide="pencil" class="w-4 h-4"></i>
+                  </button>
+                  <button onclick="confirmDeleteHabit('${h.id}')" title="Delete Habit" class="p-2 rounded-xl text-slate-400 hover:text-rose-500 hover:bg-rose-500/10">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // 5. Render 90-Day GitHub Heatmap (91 days = 13 weeks x 7 days)
+      const heatmapEl = document.getElementById('github-heatmap-grid');
+      const heatCells = [];
+      let total90Checkins = 0;
+      let active90Days = 0;
+
+      for (let i = 90; i >= 0; i--) {
+        const dKey = getOffsetDateKey(i);
+        const count = state.habits.filter(h => h.history && h.history[dKey]).length;
+        total90Checkins += count;
+        if (count > 0) active90Days++;
+        const ratio = totalHabitsCount ? count / totalHabitsCount : 0;
+
+        let colorClass = 'bg-slate-200 dark:bg-slate-800/90';
+        if (ratio > 0 && ratio <= 0.25) colorClass = 'bg-emerald-900/70 dark:bg-emerald-900/80';
+        else if (ratio > 0.25 && ratio <= 0.55) colorClass = 'bg-emerald-600/80';
+        else if (ratio > 0.55 && ratio <= 0.85) colorClass = 'bg-emerald-500';
+        else if (ratio > 0.85) colorClass = 'bg-emerald-400 shadow-sm shadow-emerald-400/30';
+
+        heatCells.push(`
+          <div title="${dKey}: ${count}/${totalHabitsCount} habits completed" class="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-[4px] ${colorClass} transition-transform hover:scale-125"></div>
+        `);
+      }
+      heatmapEl.innerHTML = heatCells.join('');
+      document.getElementById('heatmap-summary-text').textContent = `${total90Checkins} total habit check-ins over the last 91 days`;
+      document.getElementById('heatmap-active-days').textContent = `${active90Days} / 91 active days (${Math.round((active90Days / 91) * 100)}% consistency)`;
+
+      // 6. Render Analytics Pillar Alignment Bars
+      const analyticsEl = document.getElementById('pillar-analytics-bars');
+      analyticsEl.innerHTML = Object.values(PILLARS).map(p => {
+        const pVisions = state.visions.filter(v => v.pillar === p.id);
+        let pMsTotal = 0;
+        let pMsDone = 0;
+        pVisions.forEach(v => {
+          (v.milestones || []).forEach(m => {
+            pMsTotal++;
+            if (m.done) pMsDone++;
+          });
+        });
+        const vPct = pMsTotal ? Math.round((pMsDone / pMsTotal) * 100) : 0;
+
+        const pHabits = state.habits.filter(h => h.pillar === p.id);
+        let hDone = 0;
+        let hTarget = 0;
+        pHabits.forEach(h => {
+          hDone += getLast7DaysCount(h.history || {});
+          hTarget += (h.weeklyTarget || 5);
+        });
+        const hPct = hTarget ? Math.min(100, Math.round((hDone / hTarget) * 100)) : 0;
+
+        return `
+          <div class="p-4 rounded-2xl bg-slate-50/80 dark:bg-slate-925/80 border border-slate-200/70 dark:border-slate-800/80 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full ${p.dot}"></span>
+                <span class="font-bold text-sm">${p.name}</span>
+              </div>
+              <span class="text-xs text-slate-400">${pVisions.length} Visions • ${pHabits.length} Habits</span>
+            </div>
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between text-[11px]">
+                <span class="text-slate-500 dark:text-slate-400">Vision Milestone Progress</span>
+                <span class="font-bold">${vPct}%</span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                <div class="h-full bg-gradient-to-r ${p.bar} rounded-full" style="width: ${vPct}%"></div>
+              </div>
+            </div>
+            <div class="space-y-1.5 pt-1">
+              <div class="flex items-center justify-between text-[11px]">
+                <span class="text-slate-500 dark:text-slate-400">7-Day Habit Target Alignment</span>
+                <span class="font-bold text-emerald-500">${hPct}%</span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                <div class="h-full bg-emerald-500 rounded-full" style="width: ${hPct}%"></div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Refresh Lucide icons
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    }
+
+    // Initialize Application
+    window.addEventListener('DOMContentLoaded', () => {
+      applyTheme();
+      renderAll();
+    });
+  </script>
+</body>
+</html>
