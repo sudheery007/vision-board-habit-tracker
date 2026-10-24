@@ -27,7 +27,7 @@
 * **7-Day Rolling Matrix:** Back-fill or toggle any day in the past week, with per-partner indicator dots.
 * **90-Day Consistency Grid:** GitHub-style heatmap over 13 weeks (91 days) showing active days and total check-ins.
 
-### 3. Partner Accountability
+### 3. Partner Room & Cheer Hub
 * **Side-by-Side Progress Rings:** Live SVG completion rings and streak badges for both partners.
 * **Live Cheer Feed:** One-tap encouragements (*🔥 Crush it!*, *👏 Proud of you!*, *💪 Finish strong!*, *❤️ Love this!*) or custom notes. The feed is capped at the latest 100 cheers.
 * **Invite QR / Link:** The **Partner Room** modal (rose button in the header) generates a room code, an invite link (`?room=YOUR-CODE&profile=p1|p2`), an on-screen QR code, and a downloadable PNG QR poster card. The invite carries the room code and pre-selects the person on the scanning phone.
