@@ -32,7 +32,14 @@
 * **Live Cheer Feed:** One-tap encouragements (*🔥 Crush it!*, *👏 Proud of you!*, *💪 Finish strong!*, *❤️ Love this!*) or custom notes. The feed is capped at the latest 100 cheers.
 * **Invite QR / Link:** The **Partner Room** modal (rose button in the header) generates a room code, an invite link (`?room=YOUR-CODE&profile=p1|p2`), an on-screen QR code, and a downloadable PNG QR poster card. The invite carries the room code and pre-selects the person on the scanning phone.
 
-### 4. Live Cloud Sync (Firebase)
+### 4. Multiple Rooms (saved on this device)
+* **Room Names:** The header shows a friendly room name (e.g. *Family*) with a ▾ instead of the long room code. Names are local to the device.
+* **Room Switcher:** Tap the room pill to open **My Rooms**: switch between saved rooms, join a room by code, create a new one (**Random**), or remove a room from the device. Codes are masked in the list (e.g. `••••9HWD`); the full code is only shown in **Room settings & invite QR**.
+* **Separate Data Per Room:** Each room keeps its own habits, visions and cheers. Switching flushes unsent edits, stashes the room locally (`apex_room_cache_v1_<CODE>`) and subscribes to the new room. New rooms start blank.
+* **Invite Links:** Opening `?room=CODE&profile=p1|p2` adds/switches to that room without copying the current room's data into it.
+* **Planned for v2.0 (`version2.0` branch):** full member model (up to 10 users per room with a "Room is full (10/10)" cap enforced in Firestore rules).
+
+### 5. Live Cloud Sync (Firebase)
 * **Firestore Rooms:** Data is stored in one document per room at `rooms/{roomCode}`, synced in real time via `onSnapshot`.
 * **Anonymous Auth:** Devices sign in anonymously; the room code acts as the shared secret. Security rules require an authenticated user and a room code of **12+ characters**.
 * **Debounced Push:** Local edits are pushed ~0.4 s after a change inside a Firestore transaction (read → merge → write).

@@ -162,10 +162,11 @@
         <div class="mt-4 px-1 space-y-2">
           <div class="p-3 rounded-2xl border border-rose-500/20 bg-gradient-to-br from-rose-500/5 via-indigo-500/5 to-emerald-500/5 space-y-2.5">
             <div class="flex items-center justify-between">
-              <div class="flex items-center gap-1.5">
-                <span id="sync-status-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span id="sidebar-room-label" class="text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200">Room: APEX-SD</span>
-              </div>
+              <button onclick="openRoomSwitcher()" title="Switch room" class="flex items-center gap-1.5 min-w-0 text-left">
+                <span id="sync-status-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+                <span id="sidebar-room-label" class="text-[11px] font-bold tracking-wide text-slate-700 dark:text-slate-200 truncate max-w-[8rem]">Our Room</span>
+                <span class="text-[9px] text-slate-400">▾</span>
+              </button>
               <button onclick="openPartnerModal()" class="text-[11px] font-bold text-indigo-500 hover:text-indigo-400 flex items-center gap-1">
                 <i data-lucide="qr-code" class="w-3 h-3"></i>
                 <span>Room Setup</span>
@@ -263,9 +264,10 @@
 
           <!-- Right: Room Sync Pill + Quick Add (+) + Theme Toggle -->
           <div class="flex items-center gap-1.5 shrink-0">
-            <button onclick="openPartnerModal()" id="mobile-room-pill" title="Partner Room & QR Setup" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-200/70 dark:bg-slate-900/90 text-slate-700 dark:text-slate-300 border border-slate-300/60 dark:border-slate-800 flex items-center gap-1.5 active:scale-95 transition-transform">
+            <button onclick="openRoomSwitcher()" id="mobile-room-pill" title="Switch Room" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-200/70 dark:bg-slate-900/90 text-slate-700 dark:text-slate-300 border border-slate-300/60 dark:border-slate-800 flex items-center gap-1.5 active:scale-95 transition-transform">
               <span id="mobile-sync-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span id="mobile-room-code-label" class="text-[11px] font-bold">Room</span>
+              <span id="mobile-room-code-label" class="text-[11px] font-bold truncate max-w-[4.75rem]">Our Room</span>
+              <span class="text-[9px] text-slate-400">▾</span>
             </button>
 
             <button onclick="openQuickAddSheet()" title="Quick Add Vision or Habit" class="w-8 h-8 rounded-full bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center justify-center active:scale-95 transition-transform">
@@ -815,6 +817,34 @@
     </div>
   </div>
 
+  <!-- ==================== ROOM SWITCHER SHEET (rooms saved on this device) ==================== -->
+  <div id="room-switcher-sheet" onclick="closeRoomSwitcher()" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
+    <div onclick="event.stopPropagation()" class="w-full max-w-sm max-h-[88vh] overflow-y-auto rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 shadow-2xl space-y-4 mb-2 sm:mb-0">
+      <div class="flex items-center justify-between">
+        <div>
+          <h4 class="font-bold text-base text-slate-900 dark:text-white">My Rooms</h4>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400">Each room keeps its own habits, visions &amp; cheers</p>
+        </div>
+        <button onclick="closeRoomSwitcher()" class="p-1.5 rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" title="Close">✕</button>
+      </div>
+
+      <div id="room-switcher-list" class="space-y-2"></div>
+
+      <div class="pt-3 border-t border-slate-200/70 dark:border-slate-800 space-y-2.5">
+        <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Join or create a room</p>
+        <input type="text" id="room-add-name" maxlength="24" placeholder="Room name (e.g. Family)" onkeydown="if(event.key==='Enter'){event.preventDefault();joinOrCreateRoom();}" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 text-base focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+        <div class="flex gap-2">
+          <input type="text" id="room-add-code" placeholder="Room code (12+ chars)" autocapitalize="characters" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();joinOrCreateRoom();}" class="flex-1 min-w-0 px-3.5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 font-mono uppercase text-base focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          <button type="button" onclick="document.getElementById('room-add-code').value = makeRandomRoomCode()" class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-300 shrink-0">✨ Random</button>
+        </div>
+        <button type="button" onclick="joinOrCreateRoom()" class="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-sm font-bold shadow-sm active:scale-[0.98] transition-all">Join / Create Room</button>
+        <p class="text-[11px] text-slate-400 leading-snug">Enter a code someone shared with you to join their room, or tap Random to start a new private one.</p>
+      </div>
+
+      <button type="button" onclick="closeRoomSwitcher(); openPartnerModal();" class="w-full py-2 text-xs font-semibold text-indigo-500 hover:underline">Room settings &amp; invite QR →</button>
+    </div>
+  </div>
+
   <!-- ==================== MOBILE PARTNER SUMMARY & CHEER BOTTOM SHEET ==================== -->
   <div id="cheer-sheet" onclick="closeCheerSheet()" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm">
     <div onclick="event.stopPropagation()" class="w-full max-w-md rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 shadow-2xl space-y-4 mb-2 sm:mb-0">
@@ -1162,6 +1192,12 @@
                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Partner 2 Name *</label>
                 <input type="text" id="partner-p2-name" required oninput="updatePartnerQrPreview()" placeholder="Devi" class="w-full px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-rose-500" />
               </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Room Name</label>
+              <input type="text" id="partner-room-name" maxlength="24" placeholder="e.g., Family" class="w-full px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              <p class="text-[11px] text-slate-400 mt-1">Shown in the header instead of the code. Only visible on this device.</p>
             </div>
 
             <div>
@@ -1762,6 +1798,224 @@
     let state = loadState();
     let qrProfileTarget = 'p1';
 
+    // ==================== MULTI-ROOM SUPPORT (rooms are saved on this device) ====================
+    // Each saved room keeps its own copy of partners/habits/visions/cheers in localStorage; the active
+    // room's data lives in `state` and is synced to Firestore as before.
+    const ROOM_CACHE_PREFIX = 'apex_room_cache_v1_';
+    const MIN_ROOM_CODE_LENGTH = 12; // keep in sync with the Firestore rule (room.size() >= 12)
+
+    function normalizeRoomCode(code) {
+      return String(code || '').trim().toUpperCase().replace(/[^A-Z0-9-_]/g, '');
+    }
+
+    function escHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    function maskRoomCode(code) {
+      return code.length > 8 ? '••••' + code.slice(-4) : code;
+    }
+
+    function defaultRoomName(code, index) {
+      return index === 0 ? 'Our Room' : `Room ${code.slice(-4)}`;
+    }
+
+    function makeRandomRoomCode() {
+      // 12 random chars from an unambiguous 32-symbol alphabet (~60 bits) – not guessable.
+      const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      const bytes = crypto.getRandomValues(new Uint8Array(12));
+      const chars = Array.from(bytes, b => alphabet[b % alphabet.length]);
+      return 'APEX-' + [chars.slice(0, 4), chars.slice(4, 8), chars.slice(8, 12)].map(g => g.join('')).join('-');
+    }
+
+    function roomCacheKey(code) {
+      return ROOM_CACHE_PREFIX + code;
+    }
+
+    function ensureRoomRegistry() {
+      if (!Array.isArray(state.rooms)) state.rooms = [];
+      state.rooms = state.rooms.filter(r => r && r.code);
+      if (!state.rooms.some(r => r.code === state.roomCode)) {
+        state.rooms.push({ code: state.roomCode, name: defaultRoomName(state.roomCode, state.rooms.length) });
+      }
+    }
+
+    function getCurrentRoom() {
+      ensureRoomRegistry();
+      return state.rooms.find(r => r.code === state.roomCode);
+    }
+
+    function roomDisplayName() {
+      const r = getCurrentRoom();
+      return (r && r.name) || 'Room';
+    }
+
+    function stashCurrentRoom() {
+      try {
+        localStorage.setItem(roomCacheKey(state.roomCode), JSON.stringify({
+          partners: state.partners,
+          cheers: state.cheers || [],
+          visions: state.visions || [],
+          habits: state.habits || [],
+          deleted: state.deleted || {},
+          activeIdentity: state.activeIdentity,
+          ownerFilter: state.ownerFilter
+        }));
+      } catch (e) {
+        console.error('Error saving room cache:', e);
+      }
+    }
+
+    function readRoomCache(code) {
+      try {
+        const raw = localStorage.getItem(roomCacheKey(code));
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function blankRoomData() {
+      return {
+        partners: { p1: { name: 'Sudheer' }, p2: { name: 'Devi' } },
+        cheers: [],
+        visions: [],
+        habits: [],
+        deleted: {},
+        activeIdentity: 'p1',
+        ownerFilter: 'p1'
+      };
+    }
+
+    // Synchronous core: stash the current room, then load (or create) the target room's data.
+    function applyRoomSwitch(code, name) {
+      code = normalizeRoomCode(code);
+      if (!code) return false;
+      const cleanName = String(name || '').trim().slice(0, 24);
+      ensureRoomRegistry();
+      if (code === state.roomCode) {
+        if (cleanName) getCurrentRoom().name = cleanName;
+        return true;
+      }
+      stashCurrentRoom();
+      let entry = state.rooms.find(r => r.code === code);
+      if (!entry) {
+        entry = { code, name: cleanName || defaultRoomName(code, state.rooms.length) };
+        state.rooms.push(entry);
+      } else if (cleanName) {
+        entry.name = cleanName;
+      }
+      const data = readRoomCache(code) || blankRoomData();
+      state = { ...state, ...data, roomCode: code };
+      saveState(true);
+      return true;
+    }
+
+    async function switchRoom(code, name) {
+      // Push any unsent edits for the room we are leaving (best effort, max 3s).
+      if (typeof window.flushPendingPush === 'function') {
+        try { await window.flushPendingPush(); } catch (e) { /* retried later via the room cache */ }
+      }
+      const before = state.roomCode;
+      if (!applyRoomSwitch(code, name)) return;
+      closeRoomSwitcher();
+      if (state.roomCode !== before && typeof window.subscribeToPartnerRoom === 'function') {
+        window.subscribeToPartnerRoom(state.roomCode);
+      }
+      renderAll();
+      showToast(state.roomCode !== before ? `Switched to ${roomDisplayName()}` : `Already in ${roomDisplayName()}`);
+    }
+
+    function joinOrCreateRoom() {
+      const code = normalizeRoomCode(document.getElementById('room-add-code').value);
+      const name = document.getElementById('room-add-name').value;
+      if (code.length < MIN_ROOM_CODE_LENGTH) {
+        showToast(`Room code needs ${MIN_ROOM_CODE_LENGTH}+ characters (tap Random)`);
+        return;
+      }
+      document.getElementById('room-add-code').value = '';
+      document.getElementById('room-add-name').value = '';
+      switchRoom(code, name);
+    }
+
+    function renderRoomSwitcher() {
+      ensureRoomRegistry();
+      const list = document.getElementById('room-switcher-list');
+      if (!list) return;
+      list.innerHTML = state.rooms.map(r => {
+        const active = r.code === state.roomCode;
+        return `
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="switchRoom('${r.code}')" class="flex-1 min-w-0 p-3 rounded-2xl border text-left flex items-center gap-3 transition-all active:scale-[0.98] ${
+              active
+                ? 'bg-emerald-500/10 border-emerald-500/40'
+                : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:border-slate-400'
+            }">
+              <span class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 text-sm font-extrabold ${
+                active ? 'bg-emerald-500 text-slate-950' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+              }">${escHtml((r.name || 'R').charAt(0).toUpperCase())}</span>
+              <span class="min-w-0 flex-1">
+                <span class="block text-sm font-bold truncate text-slate-900 dark:text-white">${escHtml(r.name)}</span>
+                <span class="block text-[11px] font-mono text-slate-400">${escHtml(maskRoomCode(r.code))}</span>
+              </span>
+              ${active ? '<span class="text-emerald-500 font-extrabold">✓</span>' : ''}
+            </button>
+            ${active ? '' : `<button type="button" onclick="confirmLeaveRoom('${r.code}')" title="Remove from this device" class="w-9 h-9 rounded-xl text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 shrink-0">✕</button>`}
+          </div>`;
+      }).join('');
+    }
+
+    function openRoomSwitcher() {
+      renderRoomSwitcher();
+      const sheet = document.getElementById('room-switcher-sheet');
+      sheet.classList.remove('hidden');
+      sheet.classList.add('flex');
+    }
+
+    function closeRoomSwitcher() {
+      const sheet = document.getElementById('room-switcher-sheet');
+      sheet.classList.add('hidden');
+      sheet.classList.remove('flex');
+    }
+
+    function confirmLeaveRoom(code) {
+      const room = state.rooms.find(r => r.code === code);
+      if (!room || code === state.roomCode) return;
+      closeRoomSwitcher();
+      openConfirmModal(
+        `Remove "${room.name}"?`,
+        'This removes the room from this device only (unsynced local changes for it are discarded). Its data stays in the cloud and you can rejoin anytime with the room code.',
+        () => {
+          state.rooms = state.rooms.filter(r => r.code !== code);
+          try { localStorage.removeItem(roomCacheKey(code)); } catch (e) {}
+          saveState(true);
+          showToast(`Removed ${room.name}`);
+          openRoomSwitcher();
+        }
+      );
+    }
+
+    // Invite links (?room=CODE&profile=p1|p2) add/switch to that room WITHOUT carrying over the current room's data.
+    function handleInviteParams() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const urlRoom = normalizeRoomCode(params.get('room'));
+        const urlProfile = params.get('profile');
+        if (!urlRoom) return;
+        if (urlRoom !== state.roomCode) applyRoomSwitch(urlRoom, '');
+        if (urlProfile === 'p1' || urlProfile === 'p2') {
+          state.activeIdentity = urlProfile;
+          state.ownerFilter = urlProfile;
+          saveState(true);
+        }
+      } catch (e) {
+        console.error('Error handling invite link:', e);
+      }
+    }
+
+    ensureRoomRegistry();
+    handleInviteParams();
+
     function getCleanDefaultBaseUrl() {
       try {
         const org = window.location.origin;
@@ -1803,11 +2057,8 @@
             partnerHistory: h.partnerHistory || { p1: h.history || {}, p2: {} }
           })) : def.habits
         };
-        if (urlRoom) merged.roomCode = urlRoom.toUpperCase();
-        if (urlProfile === 'p1' || urlProfile === 'p2') {
-          merged.activeIdentity = urlProfile;
-          merged.ownerFilter = urlProfile;
-        }
+        // Invite params (room/profile) for an existing device are handled by handleInviteParams()
+        // so the current room's data is never carried into a different room.
         return merged;
       } catch (e) {
         console.error('Error loading state:', e);
@@ -1848,6 +2099,7 @@
     function openPartnerModal() {
       document.getElementById('partner-p1-name').value = state.partners?.p1?.name || 'Sudheer';
       document.getElementById('partner-p2-name').value = state.partners?.p2?.name || 'Devi';
+      document.getElementById('partner-room-name').value = roomDisplayName();
       document.getElementById('partner-room-code').value = state.roomCode || 'APEX-SD';
       document.getElementById('partner-base-url').value = state.baseHostUrl || getCleanDefaultBaseUrl();
       qrProfileTarget = state.activeIdentity || 'p1';
@@ -1877,14 +2129,9 @@
     }
 
     function generateRandomRoomCode() {
-      // 12 random chars from an unambiguous 32-symbol alphabet (~60 bits) – not guessable.
-      const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-      const bytes = crypto.getRandomValues(new Uint8Array(12));
-      const chars = Array.from(bytes, b => alphabet[b % alphabet.length]);
-      const rand = [chars.slice(0, 4), chars.slice(4, 8), chars.slice(8, 12)].map(g => g.join('')).join('-');
       const codeInput = document.getElementById('partner-room-code');
       if (codeInput) {
-        codeInput.value = `APEX-${rand}`;
+        codeInput.value = makeRandomRoomCode();
         updatePartnerQrPreview();
       }
     }
@@ -2122,15 +2369,37 @@
       e.preventDefault();
       const p1Name = document.getElementById('partner-p1-name').value.trim() || 'Sudheer';
       const p2Name = document.getElementById('partner-p2-name').value.trim() || 'Devi';
-      const newRoom = (document.getElementById('partner-room-code').value.trim() || 'APEX-SD').toUpperCase().replace(/[^A-Z0-9-_]/g, '');
+      const newRoom = normalizeRoomCode(document.getElementById('partner-room-code').value) || 'APEX-SD';
+      const roomName = document.getElementById('partner-room-name').value.trim().slice(0, 24);
       const baseHostUrl = document.getElementById('partner-base-url').value.trim() || getCleanDefaultBaseUrl();
+
+      ensureRoomRegistry();
+      const oldRoom = state.roomCode;
+      const roomChanged = oldRoom !== newRoom;
+
+      // Typing a code that is already saved on this device simply switches to that room.
+      if (roomChanged && state.rooms.some(r => r.code === newRoom)) {
+        closePartnerModal();
+        switchRoom(newRoom);
+        return;
+      }
 
       state.partners = {
         p1: { name: p1Name },
         p2: { name: p2Name }
       };
       state.baseHostUrl = baseHostUrl;
-      const roomChanged = state.roomCode !== newRoom;
+
+      // Editing the code here re-keys the CURRENT room (its data moves with it); use the room
+      // switcher to join or create additional rooms.
+      const entry = state.rooms.find(r => r.code === oldRoom);
+      if (entry) {
+        entry.code = newRoom;
+        if (roomName) entry.name = roomName;
+      }
+      if (roomChanged) {
+        try { localStorage.removeItem(roomCacheKey(oldRoom)); } catch (err) {}
+      }
       state.roomCode = newRoom;
 
       saveState();
@@ -2139,7 +2408,7 @@
       }
       closePartnerModal();
       renderAll();
-      showToast(`Synced to Room: ${newRoom}`);
+      showToast(`Synced to ${roomDisplayName()}`);
     }
 
     function copyInviteLink() {
@@ -2601,7 +2870,8 @@
         'Reset to Default Presets?',
         'This will restore the default sample Vision Cards and Habits. Export a JSON backup first if you want to keep your current custom entries.',
         () => {
-          state = getDefaultState();
+          // Reset only the active room's content; keep this device's room list and current room.
+          state = { ...getDefaultState(), roomCode: state.roomCode, rooms: state.rooms, baseHostUrl: state.baseHostUrl };
           saveState();
           applyTheme();
           renderAll();
@@ -2636,9 +2906,13 @@
             showToast('Invalid JSON backup file');
             return;
           }
+          // Import into the active room; keep this device's room list and current room code.
           state = {
             ...getDefaultState(),
-            ...imported
+            ...imported,
+            roomCode: state.roomCode,
+            rooms: state.rooms,
+            baseHostUrl: state.baseHostUrl
           };
           saveState();
           applyTheme();
@@ -2812,11 +3086,11 @@
       const partnerName = activeKey === 'p1' ? p2Name : p1Name;
 
       // Update Partner Identity & Room UI Labels
-      const roomCode = state.roomCode || 'APEX-SD';
+      const roomName = roomDisplayName();
       const sidebarRoomEl = document.getElementById('sidebar-room-label');
-      if (sidebarRoomEl) sidebarRoomEl.textContent = `Room: ${roomCode}`;
+      if (sidebarRoomEl) sidebarRoomEl.textContent = roomName;
       const mobRoomEl = document.getElementById('mobile-room-code-label');
-      if (mobRoomEl) mobRoomEl.textContent = roomCode.length > 7 ? 'Room' : roomCode;
+      if (mobRoomEl) mobRoomEl.textContent = roomName;
 
       // Update Identity Switcher Buttons (Desktop + Single-Row Mobile Segmented Pill)
       const idBtnP1 = document.getElementById('id-btn-p1');
@@ -3396,7 +3670,7 @@
             ? (state.partners?.p1?.name || 'Sudheer')
             : null;
         setTimeout(() => {
-          showToast(pName ? `Joined Room ${state.roomCode} as ${pName}!` : `Joined Room ${state.roomCode}!`);
+          showToast(pName ? `Joined ${roomDisplayName()} as ${pName}!` : `Joined ${roomDisplayName()}!`);
         }, 500);
       }
     });
@@ -3621,9 +3895,20 @@
       }
     }
 
+    let subscribedRoom = null;
+
     window.subscribeToPartnerRoom = function(roomCode) {
       if (!db || !currentUser) return;
       if (unsubscribeRoom) unsubscribeRoom();
+
+      // Moving to a different room: pending edits belonged to the previous room (they are kept in
+      // its local room cache and re-merged when that room is opened again).
+      const target = cleanRoomCode(roomCode);
+      if (subscribedRoom && subscribedRoom !== target) {
+        pushDirty = false;
+        clearTimeout(pushTimer);
+      }
+      subscribedRoom = target;
 
       unsubscribeRoom = onSnapshot(
         roomRef(roomCode),
@@ -3652,6 +3937,13 @@
     window.pushStateToCloud = function() {
       if (isApplyingRemote) return;
       schedulePush();
+    };
+
+    // Used by the room switcher: send unsent edits for the current room before leaving it.
+    window.flushPendingPush = async function() {
+      if (!db || !currentUser || !pushDirty) return;
+      clearTimeout(pushTimer);
+      await Promise.race([runPush(), new Promise(resolve => setTimeout(resolve, 3000))]);
     };
 
     async function initCloudSync() {
